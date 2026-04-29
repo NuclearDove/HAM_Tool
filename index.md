@@ -1,5 +1,5 @@
 ---
 title: Welcome to my blog
-WIN!WIN!WIN!
+title: WIN!WIN!WIN!
 ---
 
