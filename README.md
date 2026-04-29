@@ -18,35 +18,37 @@ _使用 GitHub Pages 将你的仓库变成一个网站或博客。_
 </header>
 
 <!--
-  <<< Author notes: Step 1 >>>
-  Choose 3-5 steps for your course.
-  The first step is always the hardest, so pick something easy!
-  Link to docs.github.com for further explanations.
-  Encourage users to open new tabs for steps!
+  <<< Author notes: Step 2 >>>
+  Start this step by acknowledging the previous step.
+  Define terms and link to docs.github.com.
+  Historic note: previous version checked for empty pull request, changed to the correct theme `minima`.
 -->
 
-## Step 1: 启用 GitHub Pages
+## Step 2: 配置你的网站
 
-_欢迎来到 GitHub Pages 与 Jekyll 课程 :tada:!_
+_你已经成功启用了 GitHub Pages! :tada:_
 
-第一步，我们需要在此 [仓库](https://docs.github.com/en/get-started/quickstart/github-glossary#repository) 中启用 GitHub Pages。
-启用后，GitHub 会将主分支（main branch）上的内容发布成一个网站，让仓库内容自动变成网页。
+接下来我们将在一个名为 `my-pages` 的分支上进行操作，这个分支我已经为你创建好了，用来帮助你完善网站的外观。 :sparkles:
 
-### :keyboard: 实操环节：启用 GitHub Pages
+Jekyll 使用一个名为 `_config.yml` 的配置文件，用来存放网站的相关设置，包括主题、站点名称、GitHub 用户名等。
+你可以在仓库的 **Code** 标签页中找到 `_config.yml` 文件。
 
-1. 打开一个新的浏览器标签页，方便一边操作一边阅读本教程。
-2. 在仓库名称下方，点击 **Settings（设置）**。
-3. 在左侧菜单的 **Code and automation（代码与自动化）** 区域中，点击 **Pages**。
-4. 在 **Source（来源）** 下拉菜单中，选择 **Deploy from a branch（从分支部署）**；
-   然后在 **Branch（分支）** 菜单中选择 `main`。
-5. 点击 **Save（保存）** 按钮。
-6. 等待大约 **一分钟**，然后刷新本页面（你正在阅读教程的这一页）。
-   [GitHub Actions](https://docs.github.com/en/actions) 会自动检测到你已完成此步骤，并跳转到下一步。
+接下来我们将使用一个适合博客的主题。在本次课程中，我们选择使用名为 **“minima”** 的主题。
 
-   > 启用 GitHub Pages 会创建一个仓库的部署版本。
-   > GitHub Actions 在等待部署完成时可能需要长达一分钟的时间。后续步骤通常只需 20 秒左右，而这一步会稍慢。
-   > **提示**：在 **Settings → Pages** 页面顶部，你会看到一个 **Visit site（访问网站）** 按钮。
-   > 点击该按钮即可查看你新建的 GitHub Pages 网站。
+### :keyboard: 实操环节: 配置你的网站
+
+1. 打开 `my-pages` 分支，找到 `_config.yml` 文件。
+2. 在文件右上角，点击编辑图标进入编辑模式。
+3. 为了使用 **minima** 主题，我们在 `_config.yml` 文件里添加下面的内容
+
+   ```yml
+   theme: minima
+   ```
+4. （可选）你还可以修改 `title:`、`author:` 和 `description:` 等配置项，用来个性化你的网站。
+5. 提交（Commit）你的修改。
+6. （可选）你可以创建一个 Pull Request，以便查看整个课程中你所做的所有更改。
+   打开 **Pull Requests** 标签页，点击 **New pull request**，然后将 `base` 设为 `main`，`compare` 设为 `my-pages`。
+7. 等待大约 20 秒后刷新本页面，[GitHub Actions](https://docs.github.com/en/actions) 会自动识别你已完成此操作，并进入下一步。
 
 <footer>
 
