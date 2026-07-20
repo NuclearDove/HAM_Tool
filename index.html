@@ -301,7 +301,7 @@ let qtb=qtbl.createTBody();Object.entries(QCODES).sort().forEach(([k,[qst,ans]])
 // --- Log Tab ---
 let l=byId("logTab");
 l.innerHTML=`
-<h2>新通联记录</h2>
+<h2>新通联记录 <span style="font-weight:normal;font-size:12px;color:#e74c3c">⚠ 数据仅保存在浏览器本地，清除缓存会丢失，退出前请导出</span></h2>
 <div class="row"><label>日期 (UTC):</label><input type="date" id="logDate"><label>时间 (UTC):</label><input type="time" id="logTime"><label>呼号:</label><input type="text" id="logCall" style="width:100px" placeholder="必填">
 <label>频率:</label><input type="text" id="logFreq" style="width:80px" placeholder="MHz"><button id="logTimeBtn" class="secondary">自动填充</button></div>
 <div class="row"><label>模式:</label><select id="logMode">${MODES_LIST.map(m=>`<option>${m}</option>`).join("")}</select>
