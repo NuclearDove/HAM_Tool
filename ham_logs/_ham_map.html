@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>HAM 通联地图</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>body{margin:0;padding:0}#map{width:100vw;height:100vh}</style>
+</head><body>
+<div id="map"></div>
+<script>
+var map = L.map('map').setView([20, 0], 2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 18
+}).addTo(map);
+var points = [  { lat: 35.5, lon: 117, call: '12', qth: 'om85', date: '2026-07-21', mode: 'SSB' },
+  { lat: 36.0611, lon: 103.8343, call: 'BG9', qth: '兰州', date: '2026-07-21', mode: 'SSB' }];
+points.forEach(function(p) {
+    L.marker([p.lat, p.lon]).addTo(map)
+        .bindPopup('<b>' + p.call + '</b><br>QTH: ' + p.qth + '<br>日期: ' + p.date + '<br>模式: ' + p.mode);
+});
+if (points.length > 0) {
+    var group = L.featureGroup(points.map(function(p) { return L.marker([p.lat, p.lon]); }));
+    map.fitBounds(group.getBounds().pad(0.1));
+}
+</script>
+</body></html>
