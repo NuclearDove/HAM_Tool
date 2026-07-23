@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAM Radio Toolbox - 业余无线电工具箱</title>
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha384-c6Rcwz4e4CITMbu/NBmnNS8yN2sC3cUElMEMfP3vqqKFp7GOYaaBBCqmaWBjmkjb" crossorigin="anonymous" />
+<script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha384-NElt3Op+9NBMCYaef5HxeJmU4Xeard/Lku8ek6hoPTvYkQPh3zLIrJP7KiRocsxO" crossorigin="anonymous"></script>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  background: #f0f2f5;
+  color: #333;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+.header {
+  background: linear-gradient(135deg, #1a237e, #283593);
+  color: #fff;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header h1 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.header .subtitle {
+  font-size: 12px;
+  opacity: .8;
+}
+
+.tab-bar {
+  display: flex;
+  background: #fff;
+  border-bottom: 2px solid #e0e0e0;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.tab-btn {
+  padding: 10px 16px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 13px;
+  white-space: nowrap;
+  color: #666;
+  transition: all .2s;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+.tab-btn:hover {
+  color: #1a237e;
+  background: #f5f5f5;
+}
+
+.tab-btn.active {
+  color: #1a237e;
+  font-weight: 600;
+  border-bottom-color: #1a237e;
+  background: #e8eaf6;
+}
+
+.tab-content {
+  display: none;
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #e8eaf6;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: #555;
+  border-top: 1px solid #c5cae9;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.5;
+  z-index: 1000;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+}
+
+.card h3 {
+  font-size: 14px;
+  color: #1a237e;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.form-row label {
+  min-width: 80px;
+  font-size: 13px;
+  color: #555;
+}
+
+.form-row input,
+.form-row select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  min-width: 100px;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+  outline: none;
+  border-color: #1a237e;
+  box-shadow: 0 0 0 2px rgba(26, 35, 126, .15);
+}
+
+.btn {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all .2s;
+}
+
+.btn-primary {
+  background: #1a237e;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #283593;
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #bdbdbd;
+}
+
+.btn-danger {
+  background: #c62828;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #b71c1c;
+}
+
+.btn-success {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.btn-success:hover {
+  background: #1b5e20;
+}
+
+.result-box {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: Consolas, monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  min-height: 60px;
+  max-height: 300px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+table.data-table th {
+  background: #1a237e;
+  color: #fff;
+  padding: 6px 8px;
+  text-align: center;
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+}
+
+table.data-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+table.data-table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.sub-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.sub-tab {
+  padding: 6px 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  background: #fff;
+  transition: all .2s;
+}
+
+.sub-tab:hover {
+  background: #e8eaf6;
+}
+
+.sub-tab.active {
+  background: #1a237e;
+  color: #fff;
+  border-color: #1a237e;
+}
+
+.sub-content {
+  display: none;
+}
+
+.sub-content.active {
+  display: block;
+}
+
+.scroll-table {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.radio-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.tooltip {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted #999;
+}
+
+.tooltip:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: pre-wrap;
+  z-index: 999;
+  max-width: 300px;
+  line-height: 1.4;
+}
+
+#map-container {
+  height: 500px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.clock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.clock-card {
+  background: #f5f5f5;
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+}
+
+.clock-card .tz-name {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.clock-card .tz-time {
+  font-family: Consolas, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a237e;
+}
+
+.morse-display {
+  font-family: Consolas, monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e7d32;
+  background: #fffde7;
+  padding: 12px;
+  border-radius: 6px;
+  min-height: 50px;
+  letter-spacing: 2px;
+}
+
+.cw-key {
+  width: 200px;
+  height: 60px;
+  background: #e0e0e0;
+  border: 3px solid #999;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  user-select: none;
+  transition: background .1s;
+}
+
+.cw-key:active,
+.cw-key.pressed {
+  background: #ff9999;
+  border-color: #c62828;
+}
+
+.log-table-wrap {
+  max-height: 350px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.mode-ref {
+  margin-bottom: 12px;
+}
+
+.mode-ref h4 {
+  color: #1a237e;
+  font-size: 13px;
+  margin: 8px 0 4px;
+}
+
+.mode-item {
+  display: flex;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.mode-item .abbr {
+  min-width: 140px;
+  font-weight: 600;
+  color: #333;
+}
+
+.mode-item .name {
+  min-width: 100px;
+  color: #666;
+}
+
+.mode-item .desc {
+  color: #888;
+  flex: 1;
+}
+
+.license-info {
+  font-size: 12px;
+  color: #555;
+  padding: 8px;
+  background: #fffde7;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-row label {
+    min-width: auto;
+  }
+
+  .tab-btn {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>📻 HAM Radio Toolbox</h1>
+<span class="subtitle">业余无线电工具箱</span>
+</div>
+<div class="tab-bar" id="tabBar">
+<button class="tab-btn active" data-tab="freq">频率/频段</button>
+<button class="tab-btn" data-tab="rf">射频工具</button>
+<button class="tab-btn" data-tab="grid">区域</button>
+<button class="tab-btn" data-tab="log">通联</button>
+<button class="tab-btn" data-tab="map">通联地图</button>
+<button class="tab-btn" data-tab="ref">参考</button>
+<button class="tab-btn" data-tab="cw">CW练习</button>
+<button class="tab-btn" data-tab="utils">工具</button>
+</div>
+
+<!-- Tab 1: 频率/频段 -->
+<div class="tab-content active" id="tab-freq">
+<div class="card">
+<h3>频率查询</h3>
+<div class="form-row">
+<select id="freqSearchMode" onchange="onSearchModeChange()">
+<option value="freq">频率</option>
+<option value="range">区间</option>
+</select>
+<input type="text" id="freqInput" placeholder="频率值" pattern="[0-9.]+" title="请输入数字" style="width:120px" onkeydown="if(event.key==='Enter')freqQuery()">
+<span id="freqSep"> ~ </span>
+<input type="text" id="freqInput2" placeholder="上限" pattern="[0-9.]+" title="请输入数字" style="width:120px;display:none" onkeydown="if(event.key==='Enter')freqQuery()">
+<select id="freqUnit">
+<option value="MHz" selected>MHz</option>
+<option value="kHz">kHz</option>
+<option value="GHz">GHz</option>
+</select>
+<button class="btn btn-primary" onclick="freqQuery()">查询</button>
+<button class="btn btn-secondary" onclick="freqClear()">清空</button>
+</div>
+<div class="result-box" id="freqResult">输入频率或频率区间，查询所属业余频段信息。</div>
+</div>
+<div class="card">
+<h3>业余频率划分表（中国）</h3>
+<div class="scroll-table">
+<table class="data-table" id="bandTable">
+<thead><tr><th>波段</th><th>频段</th><th>下限(MHz)</th><th>上限(MHz)</th><th>业务地位</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="license-info">A类: 30-3000MHz ≤25W | B类: 1.8MHz以上各业余频段，30MHz以下 ≤15W (2024.3.1前 ≤100W)，30MHz以上 ≤25W | C类: 所有业余频段，30MHz以下 ≤1000W，30MHz以上 ≤25W</div>
+</div>
+<div class="card">
+<h3>通信模式参考</h3>
+<div id="modesRef"></div>
+</div>
+</div>
+
+<!-- Tab 2: 射频工具 -->
+<div class="tab-content" id="tab-rf">
+<div class="card">
+<h3>天线计算</h3>
+<div class="form-row">
+<label>频率 (MHz):</label>
+<input type="text" id="antFreq" pattern="[0-9.]+" title="请输入频率数字" style="width:120px" placeholder="如 14.150" onkeydown="if(event.key==='Enter')antennaCalc()">
+<button class="btn btn-primary" onclick="antennaCalc()">计算</button>
+<button class="btn btn-secondary" onclick="document.getElementById('antResult').textContent=''">清空</button>
+</div>
+<div class="result-box" id="antResult"></div>
+</div>
+<div class="card">
+<h3>功率转换</h3>
+<div class="form-row">
+<label>数值:</label>
+<input type="text" id="powVal" pattern="[0-9.+-]+" title="请输入功率值" style="width:120px" onkeydown="if(event.key==='Enter')powerConvert()">
+<div class="radio-group">
+<label><input type="radio" name="powUnit" value="W" checked>W → dBm/dBW</label>
+<label><input type="radio" name="powUnit" value="dBm">dBm → W</label>
+<label><input type="radio" name="powUnit" value="dBW">dBW → W</label>
+</div>
+<button class="btn btn-primary" onclick="powerConvert()">转换</button>
+</div>
+<div class="result-box" id="powResult"></div>
+</div>
+<div class="card">
+<h3>SWR 计算</h3>
+<div class="form-row">
+<label>正向功率 (W):</label>
+<input type="text" id="swrFw" pattern="[0-9.]+" title="请输入正向功率" style="width:100px">
+<label>反射功率 (W):</label>
+<input type="text" id="swrRw" pattern="[0-9.]+" title="请输入反射功率" style="width:100px">
+<button class="btn btn-primary" onclick="swrFromPower()">由功率→SWR</button>
+</div>
+<div class="form-row">
+<label>SWR:</label>
+<input type="text" id="swrVal" pattern="[0-9.]+" title="请输入SWR值" style="width:80px">
+<label>正向功率 (W):</label>
+<input type="text" id="swrFw2" pattern="[0-9.]+" title="请输入正向功率" style="width:100px">
+<button class="btn btn-primary" onclick="swrToReflect()">由SWR→反射功率</button>
+</div>
+<div class="result-box" id="swrResult"></div>
+</div>
+<div class="card">
+<h3>馈线损耗</h3>
+<div class="form-row">
+<label>型号:</label>
+<select id="coaxType"></select>
+<label>频率 (MHz):</label>
+<input type="text" id="coaxFreq" pattern="[0-9.]+" title="请输入频率" style="width:100px">
+<label>长度 (m):</label>
+<input type="text" id="coaxLen" pattern="[0-9.]+" title="请输入长度" style="width:80px">
+<button class="btn btn-primary" onclick="coaxCalc()">计算</button>
+</div>
+<div class="result-box" id="coaxResult"></div>
+<h3 style="margin-top:8px">常见馈线衰减参考 (dB/100m)</h3>
+<div class="scroll-table" style="max-height:200px">
+<table class="data-table" id="coaxRefTable">
+<thead><tr><th>型号</th><th>100 MHz</th><th>400 MHz</th><th>1000 MHz</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- Tab 3: 区域 -->
+<div class="tab-content" id="tab-grid">
+<div class="card">
+<h3>经纬度 → 网格</h3>
+<div class="form-row">
+<label>纬度:</label>
+<input type="text" id="latIn" pattern="-?[0-9.]+(\s*[0-9.]*)*" title="请输入纬度" style="width:140px" placeholder="如 39.9042">
+<label>经度:</label>
+<input type="text" id="lonIn" pattern="-?[0-9.]+(\s*[0-9.]*)*" title="请输入经度" style="width:140px" placeholder="如 116.4074">
+<button class="btn btn-primary" onclick="llToGrid()">转换</button>
+</div>
+</div>
+<div class="card">
+<h3>网格 → 经纬度</h3>
+<div class="form-row">
+<label>网格 (如 OM89):</label>
+<input type="text" id="gridIn" pattern="[A-Za-z]{2}[0-9]{2}([A-Za-z]{2})?" title="如 OM89 或 OM89MM" style="width:140px" placeholder="如 OM89 或 OM89MM" onkeydown="if(event.key==='Enter')gridToLl()">
+<button class="btn btn-primary" onclick="gridToLl()">转换</button>
+</div>
+</div>
+<div class="card">
+<h3>网格间距离/方位</h3>
+<div class="form-row">
+<label>网格1:</label>
+<input type="text" id="distG1" pattern="[A-Za-z]{2}[0-9]{2}([A-Za-z]{2})?" title="如 OM89" style="width:120px" placeholder="如 OM89" onkeydown="if(event.key==='Enter')gridDistance()">
+<label>网格2:</label>
+<input type="text" id="distG2" pattern="[A-Za-z]{2}[0-9]{2}([A-Za-z]{2})?" title="如 FN30" style="width:120px" placeholder="如 FN30" onkeydown="if(event.key==='Enter')gridDistance()">
+<button class="btn btn-primary" onclick="gridDistance()">计算</button>
+</div>
+</div>
+<div class="result-box" id="gridResult"></div>
+</div>
+
+<!-- Tab 4: 通联 -->
+<div class="tab-content" id="tab-log">
+<div class="card">
+<h3>新通联记录</h3>
+<div class="form-row">
+<label>* 日期(UTC):</label><input type="date" id="logDate">
+<label>* 时间(UTC):</label><input type="text" id="logTime" pattern="[0-9]{4}" title="UTC时间HHMM格式" style="width:80px" placeholder="HHMM">
+<label>* 呼号:</label><input type="text" id="logCall" pattern="[A-Za-z0-9/]+" title="业余电台呼号" style="width:120px">
+<label>* 频率(MHz):</label><input type="text" id="logFreq" pattern="[0-9.]+" title="频率数字" style="width:100px">
+</div>
+<div class="form-row">
+<label>* 模式:</label><select id="logMode" onchange="logModeRstPreset()"></select>
+<label>RST发送:</label><input type="text" id="logRstS" pattern="[1-5][1-9][1-9]?" title="RST值" style="width:80px">
+<label>RST接收:</label><input type="text" id="logRstR" pattern="[1-5][1-9][1-9]?" title="RST值" style="width:80px">
+<label>对方姓名:</label><input type="text" id="logName" style="width:120px">
+</div>
+<div class="form-row">
+<label>QTH/网格:</label><input type="text" id="logQth" style="width:180px">
+<label>备注:</label><input type="text" id="logNote" style="width:240px">
+<button class="btn btn-success" id="logAddBtn" onclick="logAdd()">添加记录</button>
+<button class="btn btn-secondary" id="logCancelEditBtn" onclick="logCancelEdit()" style="display:none">取消编辑</button>
+<button class="btn btn-secondary" onclick="logClearForm()">清空</button>
+</div>
+</div>
+<div class="card">
+<h3>通联记录 <span id="logCount" style="font-weight:400;color:#888"></span></h3>
+<div class="form-row">
+<input type="text" id="logSearch" style="width:200px" placeholder="搜索呼号/模式/日期..." oninput="logRefreshTable()">
+<button class="btn btn-secondary" onclick="logRefreshTable()">刷新</button>
+<button class="btn btn-primary" onclick="logExportAdi()">导出ADI</button>
+<button class="btn btn-primary" onclick="logExportCabrillo()">导出Cabrillo</button>
+<button class="btn btn-primary" onclick="logExportCsv()">导出CSV</button>
+<button class="btn btn-secondary" onclick="logImportAdi()">导入ADI</button>
+<button class="btn btn-secondary" onclick="logBackup()">备份</button>
+<button class="btn btn-secondary" onclick="logRestore()">恢复</button>
+<input type="file" id="adiFileInput" accept=".adi,.ADI" style="display:none" onchange="logImportAdiFile(event)">
+<input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="logRestoreFile(event)">
+</div>
+<div class="log-table-wrap">
+<table class="data-table" id="logTable">
+<thead><tr><th>日期</th><th>时间</th><th>呼号</th><th>频率</th><th>模式</th><th>RST发</th><th>RST收</th><th>姓名</th><th>QTH</th><th>备注</th><th>操作</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- Tab 5: 通联地图 -->
+<div class="tab-content" id="tab-map">
+<div class="card">
+<div class="form-row" style="justify-content:space-between">
+<h3 style="border:none;padding:0;margin:0">通联地图</h3>
+<span id="mapCount" style="font-size:12px;color:#888"></span>
+<button class="btn btn-primary" onclick="mapRender()">刷新地图</button>
+</div>
+<div id="map-container"></div>
+</div>
+</div>
+
+<!-- Tab 6: 参考 -->
+<div class="tab-content" id="tab-ref">
+<div class="sub-tabs">
+<div class="sub-tab active" data-sub="qcode" onclick="switchSubTab(this,'ref')">Q简语</div>
+<div class="sub-tab" data-sub="engabbr" onclick="switchSubTab(this,'ref')">英文缩略语</div>
+<div class="sub-tab" data-sub="numabbr" onclick="switchSubTab(this,'ref')">数字缩略语</div>
+</div>
+<div class="sub-content active" id="ref-qcode">
+<div class="card">
+<h3>Q简语查询</h3>
+<div class="form-row">
+<input type="text" id="qcodeSearch" style="width:160px" placeholder="如 QTH" onkeydown="if(event.key==='Enter')abbrevLookup('qcode')">
+<button class="btn btn-primary" onclick="abbrevLookup('qcode')">查询</button>
+</div>
+<div class="result-box" id="qcodeResult"></div>
+</div>
+<div class="card"><h3>Q简语参考表</h3><div class="scroll-table"><table class="data-table" id="qcodeTable"><thead><tr><th>代码</th><th>问句含义</th><th>答句含义</th></tr></thead><tbody></tbody></table></div></div>
+</div>
+<div class="sub-content" id="ref-engabbr">
+<div class="card">
+<h3>英文缩略语查询</h3>
+<div class="form-row">
+<input type="text" id="engabbrSearch" style="width:160px" placeholder="如 CQ" onkeydown="if(event.key==='Enter')abbrevLookup('engabbr')">
+<button class="btn btn-primary" onclick="abbrevLookup('engabbr')">查询</button>
+</div>
+<div class="result-box" id="engabbrResult"></div>
+</div>
+<div class="card"><h3>英文缩略语参考表</h3><div class="scroll-table"><table class="data-table" id="engabbrTable"><thead><tr><th>缩略语</th><th>中文含义</th><th>英文说明</th></tr></thead><tbody></tbody></table></div></div>
+</div>
+<div class="sub-content" id="ref-numabbr">
+<div class="card">
+<h3>数字缩略语查询</h3>
+<div class="form-row">
+<input type="text" id="numabbrSearch" style="width:160px" placeholder="如 73" onkeydown="if(event.key==='Enter')abbrevLookup('numabbr')">
+<button class="btn btn-primary" onclick="abbrevLookup('numabbr')">查询</button>
+</div>
+<div class="result-box" id="numabbrResult"></div>
+</div>
+<div class="card"><h3>数字缩略语参考表</h3><div class="scroll-table"><table class="data-table" id="numabbrTable"><thead><tr><th>数字</th><th>中文含义</th><th>英文说明</th></tr></thead><tbody></tbody></table></div></div>
+</div>
+</div>
+
+<!-- Tab 7: CW练习 -->
+<div class="tab-content" id="tab-cw">
+<div class="card">
+<div class="form-row">
+<label>速度 (WPM):</label>
+<input type="range" id="cwWpm" min="5" max="40" value="20" oninput="document.getElementById('cwWpmLabel').textContent=this.value+' WPM'">
+<span id="cwWpmLabel" style="min-width:60px;font-weight:600">20 WPM</span>
+</div>
+</div>
+<div class="sub-tabs">
+<div class="sub-tab active" data-sub="cw-encode" onclick="switchSubTab(this,'cw')">文本→摩尔斯</div>
+<div class="sub-tab" data-sub="cw-decode" onclick="switchSubTab(this,'cw')">摩尔斯→文字</div>
+<div class="sub-tab" data-sub="cw-practice" onclick="switchSubTab(this,'cw')">随机练习</div>
+<div class="sub-tab" data-sub="cw-chart" onclick="switchSubTab(this,'cw')">码表</div>
+</div>
+<div class="sub-content active" id="cw-cw-encode">
+<div class="card">
+<h3>文本转摩尔斯码</h3>
+<p style="font-size:12px;color:#888;margin-bottom:8px">输入文本 (全角自动转半角; 中文不支持, 以 # 标记)</p>
+<textarea id="cwEncodeIn" rows="3" style="width:100%;padding:8px;font-family:Consolas,monospace;font-size:14px;resize:vertical" placeholder="输入英文文本..."></textarea>
+<div class="form-row" style="margin-top:8px">
+<button class="btn btn-primary" onclick="cwEncode()">转换为摩尔斯</button>
+<button class="btn btn-success" onclick="cwPlayEncode()">播放</button>
+<button class="btn btn-danger" onclick="cwStopPlay()">停止</button>
+</div>
+<div class="morse-display" id="cwEncodeOut" style="margin-top:8px"></div>
+</div>
+</div>
+<div class="sub-content" id="cw-cw-decode">
+<div class="card">
+<h3>摩尔斯码转文字</h3>
+<p style="font-size:12px;color:#888;margin-bottom:8px">输入摩尔斯码 (空格分隔字母, / 分隔单词)</p>
+<textarea id="cwDecodeIn" rows="4" style="width:100%;padding:8px;font-family:Consolas,monospace;font-size:16px;font-weight:bold;resize:vertical" placeholder="如: .... . .-.. .-.. --- / .-- --- .-. .-.. -.."></textarea>
+<div class="form-row" style="margin-top:8px">
+<button class="btn btn-primary" onclick="cwDecode()">转换为文字</button>
+<button class="btn btn-secondary" onclick="document.getElementById('cwDecodeIn').value='';document.getElementById('cwDecodeOut').textContent=''">清空</button>
+</div>
+<div style="margin-top:12px">
+<p style="font-size:12px;color:#666;margin-bottom:4px">模拟电键: 短按=点(·) 长按=划(-)</p>
+<div class="cw-key" id="cwKeyBtn">电键</div>
+</div>
+<div class="result-box" id="cwDecodeOut" style="margin-top:8px"></div>
+</div>
+</div>
+<div class="sub-content" id="cw-cw-practice">
+<div class="card">
+<h3>随机练习</h3>
+<div class="form-row">
+<label>字符集:</label>
+<label><input type="checkbox" id="cwPracAlpha" checked> 字母 A-Z</label>
+<label><input type="checkbox" id="cwPracNum" checked> 数字 0-9</label>
+<label><input type="checkbox" id="cwPracPunct"> 标点符号</label>
+</div>
+<div class="form-row">
+<label>每组字符数:</label>
+<select id="cwPracLen"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select>
+<label>重复次数:</label>
+<select id="cwPracCount"><option>1</option><option>2</option><option selected>3</option><option>5</option><option>10</option></select>
+</div>
+<div class="form-row">
+<button class="btn btn-primary" id="cwPracBtn" onclick="cwPracticeStart()">开始练习</button>
+<button class="btn btn-danger" onclick="cwStopPlay()">停止</button>
+<button class="btn btn-secondary" onclick="cwPracticeReveal()">显示答案</button>
+</div>
+<div class="morse-display" id="cwPracDisp" style="margin-top:8px"></div>
+<div class="result-box" id="cwPracLog" style="margin-top:8px;font-size:12px"></div>
+<div class="form-row" style="margin-top:8px">
+<label>你的抄收:</label>
+<input type="text" id="cwPracUser" style="width:200px;font-family:Consolas,monospace;font-size:14px" onkeydown="if(event.key==='Enter')cwPracticeCheck()">
+<button class="btn btn-primary" onclick="cwPracticeCheck()">检查结果</button>
+<span id="cwPracScore" style="font-weight:700;color:#2e7d32;margin-left:8px"></span>
+</div>
+</div>
+</div>
+<div class="sub-content" id="cw-cw-chart">
+<div class="card"><h3>摩尔斯码表</h3><div class="scroll-table"><table class="data-table" id="morseTable"><thead><tr><th>字符</th><th>摩尔斯码</th></tr></thead><tbody></tbody></table></div></div>
+</div>
+</div>
+
+<!-- Tab 8: 工具 -->
+<div class="tab-content" id="tab-utils">
+<div class="card">
+<h3>世界时钟</h3>
+<div class="clock-grid" id="clockGrid"></div>
+<div style="margin-top:8px">
+<div style="position:relative;display:inline-block">
+<input type="text" id="customTzInput" style="width:240px" placeholder="搜索城市（中文/英文）..." autocomplete="off" oninput="filterClockOptions()" onfocus="filterClockOptions()" onblur="hideClockOptions()">
+<div id="tzDropdown" style="display:none;position:absolute;top:100%;left:0;z-index:100;background:#fff;border:1px solid #ccc;border-radius:4px;max-height:260px;overflow-y:auto;width:300px;box-shadow:0 4px 12px rgba(0,0,0,.15)"></div>
+</div>
+<button class="btn btn-primary" onclick="addCustomClock()">添加</button>
+<button class="btn btn-secondary" onclick="clearCustomClocks()">清除自定义</button>
+</div>
+</div>
+<div class="card">
+<h3>传播条件参考</h3>
+<div class="form-row">
+<button class="btn btn-primary" onclick="propFetch()">刷新实时数据</button>
+<span id="propStatus" style="font-size:12px;color:#888;margin-left:8px"></span>
+</div>
+<div class="result-box" id="propResult" style="margin-top:8px">点击"刷新实时数据"获取当前太阳传播条件。</div>
+</div>
+<div class="card">
+<h3>RST 信号报告</h3>
+<div class="form-row">
+<label>RST (如 599):</label>
+<input type="text" id="rstInput" pattern="[1-5][1-9][1-9]?" title="RST值如59或599" style="width:120px" placeholder="如 59 或 599" onkeydown="if(event.key==='Enter')rstQuery()">
+<button class="btn btn-primary" onclick="rstQuery()">查询</button>
+</div>
+<div class="result-box" id="rstResult"></div>
+</div>
+</div>
+
+<div class="status-bar" id="statusBar">就绪</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
